@@ -81,11 +81,17 @@ func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerabili
 		}
 
 		for j := range res {
-			if s, ok := vulns[res[j].Fingerprint]; ok {
+			key := res[j].Fingerprint
+			if res[j].ID != "" {
+				key = res[j].ID
+			}
+
+			if s, ok := vulns[key]; ok {
 				s.Images = append(s.Images, image)
 				s.Containers = append(s.Containers, containers[image]...)
+				s.Packages = append(s.Packages, res[j].Packages...)
 			} else {
-				vulns[res[j].Fingerprint] = SourcedVulnerability{
+				vulns[key] = SourcedVulnerability{
 					Vulnerability: res[j],
 					Images:        []string{image},
 					Containers:    containers[image],
