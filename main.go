@@ -71,8 +71,10 @@ func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerabili
 	}
 
 	vulns := make(map[string]SourcedVulnerability)
+	done := 0
 
 	for image := range containers {
+		slog.Info("Scanning image", "image", image, "remaining", len(containers)-done)
 		res, err := scanner.Scan(ctx, image)
 		if err != nil {
 			return nil, err
@@ -90,6 +92,8 @@ func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerabili
 				}
 			}
 		}
+
+		done++
 	}
 
 	return slices.Collect(maps.Values(vulns)), nil
