@@ -120,7 +120,7 @@ func listContainers(ctx context.Context) (map[string][]Container, error) {
 		container := containers.Items[i]
 		images[container.Image] = append(images[container.Image], Container{
 			ID:   container.ID,
-			Name: container.Names[0],
+			Name: container.Names[0][1:],
 		})
 	}
 
