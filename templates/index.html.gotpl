@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Purser vulnerability report</title>
+    <style>
+        body {
+          font-family: system-ui, sans-serif;
+          font-weight: normal;
+          padding: 2em;
+        }
+
+        h2 {
+          margin-top: 2em;
+          padding: 0.5em;
+          border-radius: 5px;
+
+          &.sev-CRITICAL {
+            background-color: darkred;
+            color: white;
+          }
+
+          &.sev-HIGH {
+            background-color: darkorange;
+            color: white;
+          }
+
+          &.sev-MEDIUM {
+            background-color: yellow;
+          }
+
+          &.sev-LOW {
+            background-color: green;
+          }
+        }
+
+        .data {
+          font-size: small;
+          color: dimgray;
+        }
+
+        h3:not(h2 + h3) {
+          border-top: 1px solid lightgray;
+          margin-top: 1em;
+          padding-top: 1em;
+        }
+    </style>
+</head>
+<body>
+<h1>Purser vulnerability report</h1>
+{{range .Severities}}
+    {{if .Vulnerabilities}}
+        <h2 class="sev-{{.Name}}">{{.Name}}</h2>
+        {{range .Vulnerabilities}}
+            <h3 id="{{.Fingerprint}}">{{if .ID}}{{.ID}}:{{end}} {{.Title}}</h3>
+            <p class="data">Images:{{range .Images}} {{.}}{{end}}; Containers: {{range .Containers}} {{.Name}}{{end}}; Package: {{.Package}}; Detected version: {{.InstalledVersion}}; Fixed in: {{.FixedVersion}}</p>
+            <p>{{.Description}}</p>
+        {{end}}
+    {{end}}
+{{end}}
+</body>
+</html>

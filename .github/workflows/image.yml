@@ -1,0 +1,16 @@
+name: build image
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    uses: csmith/github-workflows/.github/workflows/build-image.yml@master
+    secrets: inherit
