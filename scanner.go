@@ -42,15 +42,6 @@ func (t *Scanner) Close(ctx context.Context) error {
 }
 
 func (t *Scanner) Scan(ctx context.Context, imageRef string) ([]Vulnerability, error) {
-	mutexChan := make(chan struct{}, 1)
-
-	select {
-	case <-ctx.Done():
-		// Handle context cancellation
-	case mutexChan <- struct{}{}:
-		defer func() { <-mutexChan }()
-	}
-
 	t.options.ScanOptions.Target = imageRef
 	report, err := t.runner.ScanImage(ctx, t.options)
 	if err != nil {
