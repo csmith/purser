@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -14,7 +13,6 @@ import (
 	ftypes "github.com/aquasecurity/trivy/pkg/fanal/types"
 	"github.com/aquasecurity/trivy/pkg/flag"
 	"github.com/aquasecurity/trivy/pkg/javadb"
-	"github.com/aquasecurity/trivy/pkg/log"
 	ttypes "github.com/aquasecurity/trivy/pkg/types"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/samber/lo"
@@ -32,8 +30,6 @@ type Scanner struct {
 
 func NewScanner(context context.Context, cacheDir string) *Scanner {
 	opts := trivyOptions(cacheDir)
-
-	configureTrivyLogger()
 
 	return &Scanner{
 		options: opts,
@@ -149,17 +145,4 @@ func trivyVersion() (string, error) {
 	}
 
 	return "", fmt.Errorf("could not find Scanner version")
-}
-
-func configureTrivyLogger() {
-	logger := slog.With("component", "trivy")
-	log.With = logger.With
-	log.Debug = logger.Debug
-	log.DebugContext = logger.DebugContext
-	log.Info = logger.Info
-	log.InfoContext = logger.InfoContext
-	log.Warn = logger.Warn
-	log.WarnContext = logger.WarnContext
-	log.Error = logger.Error
-	log.ErrorContext = logger.ErrorContext
 }
