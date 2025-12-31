@@ -33,9 +33,21 @@
           }
         }
 
-        .data {
+        ul {
           font-size: small;
           color: dimgray;
+          list-style: none;
+
+          &, li {
+            display: inline-block;
+            margin: 0;
+            padding: 0 0.5ex 0 0;
+          }
+        }
+
+        h3 {
+          margin-bottom: 0;
+          padding-bottom: 0;
         }
 
         h3:not(h2 + h3) {
@@ -52,7 +64,23 @@
         <h2 class="sev-{{.Name}}">{{.Name}}</h2>
         {{range .Vulnerabilities}}
             <h3 id="{{.Fingerprint}}">{{if .ID}}{{.ID}}:{{end}} {{.Title}}</h3>
-            <p class="data">Images:{{range .Images}} {{.}}{{end}}; Containers: {{range .Containers}} {{.Name}}{{end}}; Package: {{.Package}}; Detected version: {{.InstalledVersion}}; Fixed in: {{.FixedVersion}}</p>
+            <ul>
+                <li>Images:
+                    <ul>
+                        {{range .Images}}<li>{{.}}</li>{{end}}
+                    </ul>
+                </li>
+                <li>Containers:
+                    <ul>
+                        {{range .Containers}}<li>{{.Name}}</li>{{end}}
+                    </ul>
+                </li>
+                <li>Packages:
+                    <ul>
+                        {{range .Packages}}<li>{{.Name}} (detected: {{.InstalledVersion}}, fixed in; {{.FixedVersion}})</li>{{end}}
+                    </ul>
+                </li>
+            </ul>
             <p>{{.Description}}</p>
         {{end}}
     {{end}}

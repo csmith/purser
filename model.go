@@ -6,12 +6,16 @@ type Container struct {
 }
 
 type Vulnerability struct {
-	Title            string
-	ID               string
-	Description      string
-	Severity         string
-	Fingerprint      string
-	Package          string
+	Title       string
+	ID          string
+	Description string
+	Severity    string
+	Fingerprint string
+	Packages    []AffectedPackage
+}
+
+type AffectedPackage struct {
+	Name             string
 	FixedVersion     string
 	InstalledVersion string
 }

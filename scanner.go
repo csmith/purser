@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"maps"
 	"runtime/debug"
+	"slices"
 	"strings"
 	"time"
 
@@ -48,24 +50,45 @@ func (t *Scanner) Scan(ctx context.Context, imageRef string) ([]Vulnerability, e
 		return nil, fmt.Errorf("image scan failed: %w", err)
 	}
 
-	var vulns []Vulnerability
+	vulns := make(map[string]Vulnerability)
 	for i := range report.Results {
 		for j := range report.Results[i].Vulnerabilities {
 			v := report.Results[i].Vulnerabilities[j]
-			vulns = append(vulns, Vulnerability{
-				Title:            v.Title,
-				ID:               v.VulnerabilityID,
-				Description:      v.Description,
-				Severity:         v.Severity,
-				Fingerprint:      v.Fingerprint,
-				Package:          v.PkgName,
-				FixedVersion:     v.FixedVersion,
-				InstalledVersion: v.InstalledVersion,
-			})
+			key := v.Fingerprint
+			if v.VulnerabilityID != "" {
+				key = v.VulnerabilityID
+			}
+
+			if existing, ok := vulns[key]; ok {
+				existing.Packages = append(
+					vulns[key].Packages,
+					AffectedPackage{
+						Name:             v.PkgName,
+						FixedVersion:     v.FixedVersion,
+						InstalledVersion: v.InstalledVersion,
+					},
+				)
+				vulns[key] = existing
+			} else {
+				vulns[key] = Vulnerability{
+					Title:       v.Title,
+					ID:          v.VulnerabilityID,
+					Description: v.Description,
+					Severity:    v.Severity,
+					Fingerprint: v.Fingerprint,
+					Packages: []AffectedPackage{
+						{
+							Name:             v.PkgName,
+							FixedVersion:     v.FixedVersion,
+							InstalledVersion: v.InstalledVersion,
+						},
+					},
+				}
+			}
 		}
 	}
 
-	return vulns, nil
+	return slices.Collect(maps.Values(vulns)), nil
 }
 
 func trivyOptions(cacheDir string) flag.Options {
