@@ -6,8 +6,10 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"slices"
 	"strings"
+	"time"
 )
 
 //go:embed templates/*.gotpl
@@ -51,5 +53,20 @@ func renderTemplates(targetDir string, vulns []SourcedVulnerability) error {
 
 	return t.ExecuteTemplate(f, "index.html.gotpl", struct {
 		Severities []SeverityGroup
-	}{severities})
+		Version    string
+		Time       time.Time
+	}{
+		Severities: severities,
+		Version:    purserVersion(),
+		Time:       time.Now(),
+	})
+}
+
+func purserVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return ""
+	}
+
+	return info.Main.Version
 }
