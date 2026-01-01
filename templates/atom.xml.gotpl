@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Purser vulnerability feed: {{.Severity}} severity issues</title>
+    <updated>{{ .Time.Format "2006-01-02T15:04:05Z" }}</updated>
+    <id>https://github.com/csmith/purser#{{.Severity}}</id>
+    {{- range .Vulnerabilities }}
+    <entry>
+        <title>{{if .ID}}{{.ID | escape}}: {{end}}{{ .Title | escape }}</title>
+        <updated>{{ $.Time.Format "2006-01-02T15:04:05Z" }}</updated>
+        <author><name>Purser</name></author>
+        <id>{{ .Fingerprint | escape }}</id>
+        <content xml:lang="en" type="html">
+            &lt;h3 id=&quot;{{.Fingerprint | escape}}&quot;&gt;{{if .ID}}{{.ID | escape}}:{{end}} {{.Title | escape}}&lt;/h3&gt;
+            &lt;ul&gt;
+            &lt;li&gt;Images:
+            &lt;ul&gt;
+            {{range .Images}}&lt;li&gt;{{. | escape}}&lt;/li&gt;{{end}}
+            &lt;/ul&gt;
+            &lt;/li&gt;
+            &lt;li&gt;Containers:
+            &lt;ul&gt;
+            {{range .Containers}}&lt;li&gt;{{.Name | escape}}&lt;/li&gt;{{end}}
+            &lt;/ul&gt;
+            &lt;/li&gt;
+            &lt;li&gt;Packages:
+            &lt;ul&gt;
+            {{range .Packages}}&lt;li&gt;{{.Name | escape}} (detected: {{.InstalledVersion | escape}}, fixed in; {{.FixedVersion | escape}})&lt;/li&gt;{{end}}
+            &lt;/ul&gt;
+            &lt;/li&gt;
+            &lt;/ul&gt;
+            &lt;p&gt;{{.Description | escape}}&lt;/p&gt;
+        </content>
+    </entry>
+    {{- end }}
+</feed>
