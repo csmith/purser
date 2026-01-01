@@ -20,6 +20,7 @@ var (
 	cacheDir   = flag.String("cache-dir", ".data/cache", "Directory to store cached vulnerability information")
 	outputDir  = flag.String("output-dir", ".data/output", "Directory to write reports to")
 	scanPeriod = flag.Duration("scan-period", time.Hour*12, "How often to scan for vulnerabilities")
+	swarm      = flag.Bool("swarm", false, "Whether or not to include images from all tasks running in Docker Swarm")
 )
 
 func main() {
@@ -112,6 +113,40 @@ func listContainers(ctx context.Context) (map[string][]Container, error) {
 	}
 	defer c.Close()
 
+	if *swarm {
+		return listSwarmContainers(ctx, c)
+	}
+
+	return listNormalContainers(ctx, c)
+}
+
+func listSwarmContainers(ctx context.Context, c *client.Client) (map[string][]Container, error) {
+	tasks, err := c.TaskList(ctx, client.TaskListOptions{
+		Filters: client.Filters{
+			"desired-state": {"running": true},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	images := make(map[string][]Container)
+	for i := range tasks.Items {
+		task := tasks.Items[i]
+		slog.Debug("Found swarm task", "id", task.ID, "name", task.Name, "status", task.Status, "runtime", task.Spec.Runtime)
+		if task.Spec.ContainerSpec != nil {
+			image := task.Spec.ContainerSpec.Image
+			images[image] = append(images[image], Container{
+				ID:   task.ID,
+				Name: task.Name,
+			})
+		}
+	}
+
+	return images, nil
+}
+
+func listNormalContainers(ctx context.Context, c *client.Client) (map[string][]Container, error) {
 	containers, err := c.ContainerList(ctx, client.ContainerListOptions{
 		Filters: client.Filters{
 			"status": {"running": true},

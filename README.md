@@ -34,11 +34,12 @@ volumes:
 Purser options should be specified as environment vars. The following options
 are available:
 
-| Option      | Description                                      | Default                                              |
-|-------------|--------------------------------------------------|------------------------------------------------------|
-| SCAN_PERIOD | How often to scan containers for vulnerabilities | `12h`                                                |
-| OUTPUT_DIR  | Directory to write reports to                    | `/data/output/` (docker) `.data/output/` (otherwise) |
-| CACHE_DIR   | Directory to cache vulnerability databases in    | `/data/cache/` (docker) `.data/cache/` (otherwise)   |
-| LOG_LEVEL   | Minimum log level to output                      | `INFO`                                               |
-| LOG_FORMAT  | Format of log output (`TEXT` or `JSON`)          | `TEXT`                                               |
-| DOCKER_HOST | URL to access the Docker API                     | `-`                                                  |
+| Option      | Description                                             | Default                                              |
+|-------------|---------------------------------------------------------|------------------------------------------------------|
+| SCAN_PERIOD | How often to scan containers for vulnerabilities        | `12h`                                                |
+| OUTPUT_DIR  | Directory to write reports to                           | `/data/output/` (docker) `.data/output/` (otherwise) |
+| CACHE_DIR   | Directory to cache vulnerability databases in           | `/data/cache/` (docker) `.data/cache/` (otherwise)   |
+| SWARM       | Whether to try and scan all images used in Docker Swarm | `false`                                              |
+| LOG_LEVEL   | Minimum log level to output                             | `INFO`                                               |
+| LOG_FORMAT  | Format of log output (`TEXT` or `JSON`)                 | `TEXT`                                               |
+| DOCKER_HOST | URL to access the Docker API                            | `-`                                                  |
