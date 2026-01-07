@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log/slog"
 	"maps"
 	"os"
@@ -78,7 +79,18 @@ func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerabili
 		slog.Info("Scanning image", "image", image, "remaining", len(containers)-done)
 		res, err := scanner.Scan(ctx, image)
 		if err != nil {
-			return nil, err
+			slog.Error("Failed to scan image", "image", image, "error", err)
+			vulns[fmt.Sprintf("purser-scan-error-%s", image)] = SourcedVulnerability{
+				Vulnerability: Vulnerability{
+					Title:       "Unable to scan image",
+					Description: fmt.Sprintf("Purser was unable to scan the image: %v", err),
+					Fingerprint: fmt.Sprintf("purser-scan-error-%s", image),
+					Severity:    "CRITICAL",
+				},
+				Images:     []string{image},
+				Containers: containers[image],
+			}
+			continue
 		}
 
 		for j := range res {
