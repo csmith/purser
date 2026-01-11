@@ -19,4 +19,4 @@ COPY --from=build /notices /notices
 VOLUME /data/cache
 VOLUME /data/output
 ENTRYPOINT ["/purser"]
-CMD ["--cache-dir", "/data/cache", "--output-dir", "/data/output"]
+ENV CACHE_DIR=/data/cache OUTPUT_DIR=/data/output
