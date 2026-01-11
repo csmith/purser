@@ -19,6 +19,7 @@ services:
   purser:
     image: ghcr.io/csmith/purser
     restart: unless-stopped
+    user: '0' # or some other uid with access to the docker socket
     volumes:
       - cache:/data/cache
       - output:/data/output
@@ -28,6 +29,10 @@ volumes:
   cache:
   output:
 ```
+
+In production enviroments you may want to use a proxy like
+[dsp](https://github.com/greboid/dsp) to limit purser to
+read-only requests, and allow it to run as a regular user.
 
 ## Options
 
