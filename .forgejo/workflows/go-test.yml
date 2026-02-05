@@ -12,3 +12,4 @@ jobs:
     runs-on: docker
     with:
       tags: integration    
+      env_vars: 'GOEXPERIMENT=jsonv2'
