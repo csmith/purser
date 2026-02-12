@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2 - 2026-02-12 
+
+- Fixed purser only ever waiting to run one scan and then exiting.
+
 ## 1.1.1 - 2026-01-11
 
 - Dockerfile now uses env vars for default settings, so they can be
