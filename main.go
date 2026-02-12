@@ -40,13 +40,16 @@ func main() {
 	slog.Info("Performing initial scan")
 	performScan(ctx, scanner)
 
-	select {
-	case <-ticker.C:
-		slog.Info("Starting scan")
-		performScan(ctx, scanner)
-	case <-c:
-		slog.Info("Signal received, shutting down")
-		cancel()
+	for {
+		select {
+		case <-ticker.C:
+			slog.Info("Starting scan")
+			performScan(ctx, scanner)
+		case <-c:
+			slog.Info("Signal received, shutting down")
+			cancel()
+			return
+		}
 	}
 }
 
