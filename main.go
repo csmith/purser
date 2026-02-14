@@ -106,6 +106,7 @@ func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerabili
 				s.Images = append(s.Images, image)
 				s.Containers = append(s.Containers, containers[image]...)
 				s.Packages = append(s.Packages, res[j].Packages...)
+				vulns[key] = s
 			} else {
 				vulns[key] = SourcedVulnerability{
 					Vulnerability: res[j],
