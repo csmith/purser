@@ -10,7 +10,7 @@ require (
 	github.com/google/go-containerregistry v0.20.7
 	github.com/moby/moby/client v0.2.2
 	github.com/samber/lo v1.52.0
-	modernc.org/sqlite v1.45.0
+	modernc.org/sqlite v1.46.0
 )
 
 require (
