@@ -9,7 +9,7 @@ require (
 	github.com/csmith/slogflags v1.1.0
 	github.com/google/go-containerregistry v0.21.1
 	github.com/moby/moby/client v0.2.2
-	github.com/samber/lo v1.52.0
+	github.com/samber/lo v1.53.0
 	modernc.org/sqlite v1.46.1
 )
 
