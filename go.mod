@@ -6,7 +6,7 @@ require (
 	github.com/aquasecurity/trivy v0.69.3
 	github.com/aquasecurity/trivy-db v0.0.0-20260318025153-32625aa31027
 	github.com/csmith/envflag/v2 v2.0.0
-	github.com/csmith/slogflags v1.1.0
+	github.com/csmith/slogflags v1.2.0
 	github.com/google/go-containerregistry v0.21.3
 	github.com/moby/moby/client v0.3.0
 	github.com/samber/lo v1.53.0
