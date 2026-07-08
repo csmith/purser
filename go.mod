@@ -3,7 +3,7 @@ module github.com/csmith/purser
 go 1.26.3
 
 require (
-	github.com/aquasecurity/trivy v0.71.0
+	github.com/aquasecurity/trivy v0.71.1
 	github.com/aquasecurity/trivy-db v0.0.0-20260318025153-32625aa31027
 	github.com/csmith/envflag/v2 v2.0.0
 	github.com/csmith/slogflags v1.2.0
