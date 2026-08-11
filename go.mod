@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	github.com/aquasecurity/trivy v0.72.0
-	github.com/aquasecurity/trivy-db v0.0.0-20260629102122-a0049d7ad12f
+	github.com/aquasecurity/trivy-db v0.0.0-20260713131703-4be526083c54
 	github.com/csmith/envflag/v2 v2.0.0
 	github.com/csmith/slogflags v1.2.0
 	github.com/google/go-containerregistry v0.21.7
