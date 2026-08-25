@@ -8,7 +8,7 @@ require (
 	github.com/csmith/envflag/v2 v2.0.0
 	github.com/csmith/slogflags v1.2.0
 	github.com/google/go-containerregistry v0.21.7
-	github.com/moby/moby/client v0.5.0
+	github.com/moby/moby/client v0.5.1
 	github.com/samber/lo v1.53.0
 	modernc.org/sqlite v1.55.0
 )
