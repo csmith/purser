@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"maps"
 	"runtime/debug"
 	"slices"
@@ -16,6 +17,7 @@ import (
 	"github.com/aquasecurity/trivy/pkg/flag"
 	"github.com/aquasecurity/trivy/pkg/javadb"
 	ttypes "github.com/aquasecurity/trivy/pkg/types"
+	"github.com/moby/moby/client"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/samber/lo"
 
@@ -46,6 +48,16 @@ func (t *Scanner) Close(ctx context.Context) error {
 func (t *Scanner) Scan(ctx context.Context, imageRef string) ([]Vulnerability, error) {
 	t.options.ScanOptions.Target = imageRef
 	report, err := t.runner.ScanImage(ctx, t.options)
+	if incompleteArchiveErr(err) {
+		// The daemon has the image's metadata but not its content, so its
+		// archive of the image references blobs it doesn't contain. Re-fetch
+		// the exact content the container runs (pull by digest, not tag, so
+		// the scanned version can't drift) and try once more.
+		if repairErr := t.repairImage(ctx, imageRef); repairErr != nil {
+			return nil, fmt.Errorf("image scan failed: %w (re-fetch of image content failed: %w)", err, repairErr)
+		}
+		report, err = t.runner.ScanImage(ctx, t.options)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("image scan failed: %w", err)
 	}
@@ -89,6 +101,72 @@ func (t *Scanner) Scan(ctx context.Context, imageRef string) ([]Vulnerability, e
 	}
 
 	return slices.Collect(maps.Values(vulns)), nil
+}
+
+// incompleteArchiveErr reports whether err is the signature of the daemon
+// exporting an image archive that references blobs it did not include. Docker
+// currently does this silently when it has an image's metadata but not its
+// content (e.g. moby/moby#49473). Deliberately does not match the "tag %s not
+// found in tarball" error, which is a tag mismatch rather than missing content.
+func incompleteArchiveErr(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "not found in tar") && !strings.Contains(msg, "not found in tarball")
+}
+
+// digestFor returns the repo digest from repoDigests pointing at the same
+// repository as imageRef. Pulling by that digest re-fetches exactly the
+// content of the image the container is running, even if the tag has since
+// moved to a newer build.
+func digestFor(imageRef string, repoDigests []string) (string, bool) {
+	ref, err := name.ParseReference(imageRef)
+	if err != nil {
+		return "", false
+	}
+	repo := ref.Context().Name()
+	for _, repoDigest := range repoDigests {
+		// Normalise both sides, since daemon records may use short names like
+		// "adze@sha256:..." where the reference parses to "docker.io/library/adze".
+		if d, err := name.NewDigest(repoDigest); err == nil && d.Context().Name() == repo {
+			return repoDigest, true
+		}
+	}
+	return "", false
+}
+
+// repairImage re-downloads the image's content from the registry it came
+// from, using the repo digest recorded on the daemon, so the image's archive
+// becomes complete again.
+//
+// The pull is unauthenticated: the Docker API does not expose daemon-stored
+// credentials to API clients, and purser has no credential handling. This
+// works for registries that allow anonymous pulls (such as the mirror this
+// was written for); otherwise the re-fetch fails and the original scan error
+// is reported.
+func (t *Scanner) repairImage(ctx context.Context, imageRef string) error {
+	c, err := client.New(client.FromEnv)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	inspect, err := c.ImageInspect(ctx, imageRef)
+	if err != nil {
+		return err
+	}
+	digest, ok := digestFor(imageRef, inspect.RepoDigests)
+	if !ok {
+		return fmt.Errorf("no repo digest recorded for %s, cannot re-fetch its content", imageRef)
+	}
+
+	slog.Warn("Daemon's copy of the image is missing content, re-fetching it by digest", "image", imageRef, "digest", digest)
+	resp, err := c.ImagePull(ctx, digest, client.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+	return resp.Wait(ctx)
 }
 
 func trivyOptions(cacheDir string) flag.Options {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0 - 2026-09-05
+
+- Purser will now try to pull images when docker-save provides
+  an incomplete tarball. This happens when the image has been
+  pruned.
+
 ## 1.1.2 - 2026-02-12 
 
 - Fixed purser only ever waiting to run one scan and then exiting.

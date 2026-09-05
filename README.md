@@ -32,7 +32,7 @@ volumes:
 
 In production enviroments you may want to use a proxy like
 [dsp](https://github.com/greboid/dsp) to limit purser to
-read-only requests, and allow it to run as a regular user.
+read-only requests and pulls, and allow it to run as a regular user.
 
 ## Options
 
@@ -48,3 +48,15 @@ are available:
 | LOG_LEVEL   | Minimum log level to output                             | `INFO`                                               |
 | LOG_FORMAT  | Format of log output (`TEXT` or `JSON`)                 | `TEXT`                                               |
 | DOCKER_HOST | URL to access the Docker API                            | `-`                                                  |
+
+## Docker pruning and missing images 
+
+If Purser runs against a docker daemon that prunes its images, the original
+image may no longer be available. In this case, Purser will show critical
+"Unable to scan image" errors with a message along the lines of:
+
+> Purser was unable to scan the image: image scan failed: scan error: scan failed: failed analysis: unable to get the image's config file: unable to populate: unable to open: failed to initialize the struct from the temporary file: file blobs/sha256/b57acab7ab2fad3c7d8271f95477c8a57461cdb210d1b521ec7b879094bfbb5b not found in tar
+
+As of v1.2.0, Purser will attempt to pull these images (with the exact digest
+that is running) and retry the scan. Purser currently has no way to
+authenticate to private registries, so this will only work for public images.
