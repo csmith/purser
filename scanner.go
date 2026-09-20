@@ -17,8 +17,8 @@ import (
 	"github.com/aquasecurity/trivy/pkg/flag"
 	"github.com/aquasecurity/trivy/pkg/javadb"
 	ttypes "github.com/aquasecurity/trivy/pkg/types"
-	"github.com/moby/moby/client"
 	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/moby/moby/client"
 	"github.com/samber/lo"
 
 	_ "modernc.org/sqlite" // Required to read the Java vulnerability DB
