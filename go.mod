@@ -7,7 +7,7 @@ require (
 	github.com/aquasecurity/trivy-db v0.0.0-20260813095258-0e0340a01b57
 	github.com/csmith/envflag/v2 v2.0.0
 	github.com/csmith/slogflags v1.2.0
-	github.com/google/go-containerregistry v0.21.9
+	github.com/google/go-containerregistry v0.22.0
 	github.com/moby/moby/client v0.5.1
 	github.com/samber/lo v1.53.0
 	modernc.org/sqlite v1.57.0
@@ -205,7 +205,7 @@ require (
 	github.com/josephburnett/jd/v2 v2.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.19.1 // indirect
+	github.com/klauspost/compress v1.19.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f // indirect
 	github.com/knqyf263/go-deb-version v0.0.0-20241115132648-6f4aee6ccd23 // indirect
