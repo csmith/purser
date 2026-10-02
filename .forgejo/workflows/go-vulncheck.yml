@@ -11,5 +11,3 @@ jobs:
   build:
     uses: meta/workflows/.forgejo/workflows/go-vulncheck.yml@master
     runs-on: docker
-    with:
-      env_vars: 'GOEXPERIMENT=jsonv2'    

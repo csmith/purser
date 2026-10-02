@@ -84,14 +84,12 @@ func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerabili
 		if err != nil {
 			slog.Error("Failed to scan image", "image", image, "error", err)
 			vulns[fmt.Sprintf("purser-scan-error-%s", image)] = SourcedVulnerability{
-				Vulnerability: Vulnerability{
-					Title:       "Unable to scan image",
-					Description: fmt.Sprintf("Purser was unable to scan the image: %v", err),
-					Fingerprint: fmt.Sprintf("purser-scan-error-%s", image),
-					Severity:    "CRITICAL",
-				},
-				Images:     []string{image},
-				Containers: containers[image],
+				Title:       "Unable to scan image",
+				Description: fmt.Sprintf("Purser was unable to scan the image: %v", err),
+				Fingerprint: fmt.Sprintf("purser-scan-error-%s", image),
+				Severity:    "CRITICAL",
+				Images:      []string{image},
+				Containers:  containers[image],
 			}
 			continue
 		}
@@ -127,7 +125,7 @@ func listContainers(ctx context.Context) (map[string][]Container, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer c.Close()
+	defer func() { _ = c.Close() }()
 
 	if *swarm {
 		return listSwarmContainers(ctx, c)
@@ -137,11 +135,14 @@ func listContainers(ctx context.Context) (map[string][]Container, error) {
 }
 
 func listSwarmContainers(ctx context.Context, c *client.Client) (map[string][]Container, error) {
-	tasks, err := c.TaskList(ctx, client.TaskListOptions{
-		Filters: client.Filters{
-			"desired-state": {"running": true},
+	tasks, err := c.TaskList(
+		ctx,
+		client.TaskListOptions{
+			Filters: client.Filters{
+				"desired-state": {"running": true},
+			},
 		},
-	})
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -152,10 +153,13 @@ func listSwarmContainers(ctx context.Context, c *client.Client) (map[string][]Co
 		slog.Debug("Found swarm task", "id", task.ID, "name", task.Name, "status", task.Status, "runtime", task.Spec.Runtime)
 		if task.Spec.ContainerSpec != nil {
 			image := task.Spec.ContainerSpec.Image
-			images[image] = append(images[image], Container{
-				ID:   task.ID,
-				Name: task.Name,
-			})
+			images[image] = append(
+				images[image],
+				Container{
+					ID:   task.ID,
+					Name: task.Name,
+				},
+			)
 		}
 	}
 
@@ -163,11 +167,14 @@ func listSwarmContainers(ctx context.Context, c *client.Client) (map[string][]Co
 }
 
 func listNormalContainers(ctx context.Context, c *client.Client) (map[string][]Container, error) {
-	containers, err := c.ContainerList(ctx, client.ContainerListOptions{
-		Filters: client.Filters{
-			"status": {"running": true},
+	containers, err := c.ContainerList(
+		ctx,
+		client.ContainerListOptions{
+			Filters: client.Filters{
+				"status": {"running": true},
+			},
 		},
-	})
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -175,10 +182,13 @@ func listNormalContainers(ctx context.Context, c *client.Client) (map[string][]C
 	images := make(map[string][]Container)
 	for i := range containers.Items {
 		container := containers.Items[i]
-		images[container.Image] = append(images[container.Image], Container{
-			ID:   container.ID,
-			Name: container.Names[0][1:],
-		})
+		images[container.Image] = append(
+			images[container.Image],
+			Container{
+				ID:   container.ID,
+				Name: container.Names[0][1:],
+			},
+		)
 	}
 
 	return images, nil

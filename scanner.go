@@ -46,7 +46,7 @@ func (t *Scanner) Close(ctx context.Context) error {
 }
 
 func (t *Scanner) Scan(ctx context.Context, imageRef string) ([]Vulnerability, error) {
-	t.options.ScanOptions.Target = imageRef
+	t.options.Target = imageRef
 	report, err := t.runner.ScanImage(ctx, t.options)
 	if incompleteArchiveErr(err) {
 		// The daemon has the image's metadata but not its content, so its
@@ -86,7 +86,7 @@ func (t *Scanner) Scan(ctx context.Context, imageRef string) ([]Vulnerability, e
 					Title:       v.Title,
 					ID:          v.VulnerabilityID,
 					Description: v.Description,
-					Severity:    v.Severity,
+					Severity:    v.Severity, //nolint:staticcheck // Keep Trivy's selected severity, including its source fallback.
 					Fingerprint: v.Fingerprint,
 					Packages: []AffectedPackage{
 						{
@@ -103,11 +103,7 @@ func (t *Scanner) Scan(ctx context.Context, imageRef string) ([]Vulnerability, e
 	return slices.Collect(maps.Values(vulns)), nil
 }
 
-// incompleteArchiveErr reports whether err is the signature of the daemon
-// exporting an image archive that references blobs it did not include. Docker
-// currently does this silently when it has an image's metadata but not its
-// content (e.g. moby/moby#49473). Deliberately does not match the "tag %s not
-// found in tarball" error, which is a tag mismatch rather than missing content.
+// incompleteArchiveErr matches missing blobs, not tag mismatches.
 func incompleteArchiveErr(err error) bool {
 	if err == nil {
 		return false
@@ -117,7 +113,7 @@ func incompleteArchiveErr(err error) bool {
 }
 
 // digestFor returns the repo digest from repoDigests pointing at the same
-// repository as imageRef. Pulling by that digest re-fetches exactly the
+// repository as imageRef. Pulling by that digest re-fetches the
 // content of the image the container is running, even if the tag has since
 // moved to a newer build.
 func digestFor(imageRef string, repoDigests []string) (string, bool) {
@@ -150,7 +146,7 @@ func (t *Scanner) repairImage(ctx context.Context, imageRef string) error {
 	if err != nil {
 		return err
 	}
-	defer c.Close()
+	defer func() { _ = c.Close() }()
 
 	inspect, err := c.ImageInspect(ctx, imageRef)
 	if err != nil {
@@ -174,51 +170,35 @@ func trivyOptions(cacheDir string) flag.Options {
 	// Cobra and doesn't have a good way for us to get default options. Instead,
 	// we just have to specify everything we care about here.
 	return flag.Options{
-		GlobalOptions: flag.GlobalOptions{
-			Quiet:    true,
-			CacheDir: cacheDir,
-			Timeout:  5 * time.Minute,
+		Quiet:    true,
+		CacheDir: cacheDir,
+		Timeout:  5 * time.Minute,
+
+		CacheBackend: "fs",
+
+		NoProgress: true,
+		DBRepositories: []name.Reference{
+			lo.Must(name.NewTag(db.DefaultGCRRepository)),
+			lo.Must(name.NewTag(db.DefaultGHCRRepository)),
+		},
+		JavaDBRepositories: []name.Reference{
+			lo.Must(name.NewTag(javadb.DefaultGCRRepository)),
+			lo.Must(name.NewTag(javadb.DefaultGHCRRepository)),
 		},
 
-		CacheOptions: flag.CacheOptions{
-			CacheBackend: "fs",
-		},
+		ImageSources: ftypes.ImageSources{ftypes.DockerImageSource},
 
-		DBOptions: flag.DBOptions{
-			NoProgress: true,
-			DBRepositories: []name.Reference{
-				lo.Must(name.NewTag(db.DefaultGCRRepository)),
-				lo.Must(name.NewTag(db.DefaultGHCRRepository)),
-			},
-			JavaDBRepositories: []name.Reference{
-				lo.Must(name.NewTag(javadb.DefaultGCRRepository)),
-				lo.Must(name.NewTag(javadb.DefaultGHCRRepository)),
-			},
-		},
+		PkgTypes:         ttypes.PkgTypes,
+		PkgRelationships: ftypes.Relationships,
 
-		ImageOptions: flag.ImageOptions{
-			ImageSources: ftypes.ImageSources{ftypes.DockerImageSource},
-		},
+		Format: ttypes.FormatJSON,
 
-		PackageOptions: flag.PackageOptions{
-			PkgTypes:         ttypes.PkgTypes,
-			PkgRelationships: ftypes.Relationships,
-		},
+		Scanners:          ttypes.Scanners{ttypes.VulnerabilityScanner},
+		Parallel:          0,
+		DetectionPriority: ftypes.PriorityPrecise,
+		DisableTelemetry:  true,
 
-		ReportOptions: flag.ReportOptions{
-			Format: ttypes.FormatJSON,
-		},
-
-		ScanOptions: flag.ScanOptions{
-			Scanners:          ttypes.Scanners{ttypes.VulnerabilityScanner},
-			Parallel:          0,
-			DetectionPriority: ftypes.PriorityPrecise,
-			DisableTelemetry:  true,
-		},
-
-		VulnerabilityOptions: flag.VulnerabilityOptions{
-			VulnSeveritySources: []dbtypes.SourceID{"auto"},
-		},
+		VulnSeveritySources: []dbtypes.SourceID{"auto"},
 
 		AppVersion: lo.Must(trivyVersion()),
 	}

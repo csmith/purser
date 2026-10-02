@@ -1,5 +1,4 @@
-FROM golang:1.26 AS build
-ENV GOEXPERIMENT=jsonv2
+FROM golang:1.27 AS build
 
 WORKDIR /go/src/app
 COPY . .

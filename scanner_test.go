@@ -67,13 +67,16 @@ func TestDigestFor(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			got, ok := digestFor(tt.ref, tt.digests)
-			if ok != tt.wantOK || got != tt.want {
-				t.Errorf("digestFor(%q, %v) = (%q, %v), want (%q, %v)", tt.ref, tt.digests, got, ok, tt.want, tt.wantOK)
-			}
-		})
+		t.Run(
+			tt.name,
+			func(t *testing.T) {
+				t.Parallel()
+				got, ok := digestFor(tt.ref, tt.digests)
+				if ok != tt.wantOK || got != tt.want {
+					t.Errorf("digestFor(%q, %v) = (%q, %v), want (%q, %v)", tt.ref, tt.digests, got, ok, tt.want, tt.wantOK)
+				}
+			},
+		)
 	}
 }
 

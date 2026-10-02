@@ -31,14 +31,20 @@ func renderTemplates(targetDir string, vulns []SourcedVulnerability) error {
 
 	var severities []SeverityGroup
 	for _, sev := range []string{"CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"} {
-		slices.SortFunc(vulnsBySev[sev], func(a, b SourcedVulnerability) int {
-			return strings.Compare(a.Title, b.Title)
-		})
+		slices.SortFunc(
+			vulnsBySev[sev],
+			func(a, b SourcedVulnerability) int {
+				return strings.Compare(a.Title, b.Title)
+			},
+		)
 
-		severities = append(severities, SeverityGroup{
-			Name:            sev,
-			Vulnerabilities: vulnsBySev[sev],
-		})
+		severities = append(
+			severities,
+			SeverityGroup{
+				Name:            sev,
+				Vulnerabilities: vulnsBySev[sev],
+			},
+		)
 	}
 
 	if err := renderHtml(targetDir, severities); err != nil {
@@ -61,17 +67,23 @@ func renderHtml(targetDir string, severities []SeverityGroup) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
-	return t.Execute(f, struct {
-		Severities []SeverityGroup
-		Version    string
-		Time       time.Time
-	}{
-		Severities: severities,
-		Version:    purserVersion(),
-		Time:       time.Now(),
-	})
+	if err := t.Execute(
+		f,
+		struct {
+			Severities []SeverityGroup
+			Version    string
+			Time       time.Time
+		}{
+			Severities: severities,
+			Version:    purserVersion(),
+			Time:       time.Now(),
+		},
+	); err != nil {
+		return err
+	}
+	return f.Close()
 }
 
 func renderFeeds(targetDir string, severities []SeverityGroup) error {
@@ -100,17 +112,23 @@ func renderFeed(t *template.Template, targetDir string, sev SeverityGroup) error
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
-	return t.Execute(f, struct {
-		Severity        string
-		Vulnerabilities []SourcedVulnerability
-		Time            time.Time
-	}{
-		Severity:        sev.Name,
-		Vulnerabilities: sev.Vulnerabilities,
-		Time:            time.Now(),
-	})
+	if err := t.Execute(
+		f,
+		struct {
+			Severity        string
+			Vulnerabilities []SourcedVulnerability
+			Time            time.Time
+		}{
+			Severity:        sev.Name,
+			Vulnerabilities: sev.Vulnerabilities,
+			Time:            time.Now(),
+		},
+	); err != nil {
+		return err
+	}
+	return f.Close()
 }
 
 func purserVersion() string {
