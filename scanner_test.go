@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 const (
 	digest1 = "sha256:1111111111111111111111111111111111111111111111111111111111111111"
@@ -11,19 +14,20 @@ const (
 func TestIncompleteArchiveErr(t *testing.T) {
 	t.Parallel()
 
-	missingBlob := "image scan failed: scan error: failed to initialize the struct from the temporary file: file blobs/sha256/9e94bb97a736959a44b9bffeeecea3fffcb41d0ccdb940778615580cba7eede0 not found in tar"
+	missingBlob := "image scan failed: scan error: failed to initialize the struct from the temporary file: " +
+		"file blobs/sha256/9e94bb97a736959a44b9bffeeecea3fffcb41d0ccdb940778615580cba7eede0 not found in tar"
 	missingTag := "unable to open: tag git.yak-wall.ts.net/containers-mirror/adze:dev not found in tarball"
 
-	if !incompleteArchiveErr(errString(missingBlob)) {
+	if !incompleteArchiveErr(errors.New(missingBlob)) {
 		t.Error("incompleteArchiveErr should match a missing blob error")
 	}
 	if incompleteArchiveErr(nil) {
 		t.Error("incompleteArchiveErr should not match nil")
 	}
-	if incompleteArchiveErr(errString("no such image")) {
+	if incompleteArchiveErr(errors.New("no such image")) {
 		t.Error("incompleteArchiveErr should not match unrelated errors")
 	}
-	if incompleteArchiveErr(errString(missingTag)) {
+	if incompleteArchiveErr(errors.New(missingTag)) {
 		t.Error("incompleteArchiveErr should not match the 'tag not found in tarball' error")
 	}
 }
@@ -79,7 +83,3 @@ func TestDigestFor(t *testing.T) {
 		)
 	}
 }
-
-type errString string
-
-func (e errString) Error() string { return string(e) }

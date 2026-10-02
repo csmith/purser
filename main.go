@@ -83,10 +83,10 @@ func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerabili
 		res, err := scanner.Scan(ctx, image)
 		if err != nil {
 			slog.Error("Failed to scan image", "image", image, "error", err)
-			vulns[fmt.Sprintf("purser-scan-error-%s", image)] = SourcedVulnerability{
+			vulns["purser-scan-error-"+image] = SourcedVulnerability{
 				Title:       "Unable to scan image",
 				Description: fmt.Sprintf("Purser was unable to scan the image: %v", err),
-				Fingerprint: fmt.Sprintf("purser-scan-error-%s", image),
+				Fingerprint: "purser-scan-error-" + image,
 				Severity:    "CRITICAL",
 				Images:      []string{image},
 				Containers:  containers[image],

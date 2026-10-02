@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"maps"
@@ -157,7 +158,13 @@ func (t *Scanner) repairImage(ctx context.Context, imageRef string) error {
 		return fmt.Errorf("no repo digest recorded for %s, cannot re-fetch its content", imageRef)
 	}
 
-	slog.Warn("Daemon's copy of the image is missing content, re-fetching it by digest", "image", imageRef, "digest", digest)
+	slog.Warn(
+		"Daemon's copy of the image is missing content, re-fetching it by digest",
+		"image",
+		imageRef,
+		"digest",
+		digest,
+	)
 	resp, err := c.ImagePull(ctx, digest, client.ImagePullOptions{})
 	if err != nil {
 		return err
@@ -207,7 +214,7 @@ func trivyOptions(cacheDir string) flag.Options {
 func trivyVersion() (string, error) {
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
-		return "", fmt.Errorf("could not read build info")
+		return "", errors.New("could not read build info")
 	}
 
 	for _, d := range info.Deps {
@@ -216,5 +223,5 @@ func trivyVersion() (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("could not find Scanner version")
+	return "", errors.New("could not find Scanner version")
 }

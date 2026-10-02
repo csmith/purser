@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"html"
 	htemplate "html/template"
 	"log/slog"
@@ -29,7 +28,7 @@ func renderTemplates(targetDir string, vulns []SourcedVulnerability) error {
 		vulnsBySev[vulns[i].Severity] = append(vulnsBySev[vulns[i].Severity], vulns[i])
 	}
 
-	var severities []SeverityGroup
+	severities := make([]SeverityGroup, 0, 5)
 	for _, sev := range []string{"CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"} {
 		slices.SortFunc(
 			vulnsBySev[sev],
@@ -105,7 +104,7 @@ func renderFeeds(targetDir string, severities []SeverityGroup) error {
 }
 
 func renderFeed(t *template.Template, targetDir string, sev SeverityGroup) error {
-	path := filepath.Join(targetDir, fmt.Sprintf("%s.xml", strings.ToLower(sev.Name)))
+	path := filepath.Join(targetDir, strings.ToLower(sev.Name)+".xml")
 	slog.Info("Writing feed", "path", path)
 
 	f, err := os.Create(path)
