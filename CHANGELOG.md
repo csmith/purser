@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0 - 2026-10-09
+
+- Updated dependencies.
+
 ## 1.2.0 - 2026-09-05
 
 - Purser will now try to pull images when docker-save provides
