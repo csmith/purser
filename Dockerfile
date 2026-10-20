@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
         --ignore modernc.org/mathutil \
         ;
 
-FROM ghcr.io/greboid/dockerbase/nonroot:1.20260918.0
+FROM ghcr.io/greboid/dockerbase/nonroot:1.20261020.1
 COPY --from=build /purser /purser
 COPY --from=build --chown=65532:65532 /data /
 COPY --from=build /notices /notices

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1 - 2026-10-20
+
+- Updated to Go 1.27.3 and dockerbase 1.20261020.1, which distrust the
+  compromised eMudhra intermediate CA.
+
 ## 1.3.0 - 2026-10-09
 
 - Updated dependencies.
