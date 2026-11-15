@@ -1,6 +1,6 @@
 module github.com/csmith/purser
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/aquasecurity/trivy v0.76.0
