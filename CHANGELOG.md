@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.3 - 2026-11-15
+
+- Updated Go to 1.27.4, trivy to 0.76.0.
+
 ## 1.3.2 - 2026-11-06
 
 - Updated dependencies.
