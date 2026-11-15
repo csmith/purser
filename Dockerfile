@@ -5,11 +5,8 @@ COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod \
     set -eux; \
     CGO_ENABLED=0 go build -o /purser .; \
-    mkdir -p /data/cache /data/output; \
-    go run github.com/google/go-licenses@latest save ./... --save_path=/notices \
-        --ignore github.com/xi2/xz \
-        --ignore modernc.org/mathutil \
-        ;
+    mkdir -p /data/cache /data/output /notices; \
+    go tool gocredits -skip-missing . > /notices/CREDITS;
 
 FROM ghcr.io/greboid/dockerbase/nonroot:1.20261020.1
 COPY --from=build /purser /purser
