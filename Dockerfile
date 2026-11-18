@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     mkdir -p /data/cache /data/output /notices; \
     go tool gocredits -skip-missing . > /notices/CREDITS;
 
-FROM ghcr.io/greboid/dockerbase/nonroot:1.20261020.1
+FROM ghcr.io/greboid/dockerbase/nonroot:1.20261021.0
 COPY --from=build /purser /purser
 COPY --from=build --chown=65532:65532 /data /
 COPY --from=build /notices /notices
