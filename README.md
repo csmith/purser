@@ -49,6 +49,62 @@ are available:
 | LOG_FORMAT  | Format of log output (`TEXT` or `JSON`)                 | `TEXT`                                               |
 | DOCKER_HOST | URL to access the Docker API                            | `-`                                                  |
 
+## Reports
+
+After each scan, Purser writes these files to the output directory:
+
+- `index.html`, a report of all vulnerabilities found, grouped by severity
+- an Atom feed for each severity (e.g. `critical.xml`)
+- `report.json`, the same results for other tools to process
+
+`report.json` looks like this:
+
+```json
+{
+  "time": "2026-11-22T09:15:42.123456789Z",
+  "purser_version": "v1.4.0",
+  "vulnerabilities": [
+    {
+      "title": "openssl: Example vulnerability",
+      "id": "CVE-2026-12345",
+      "description": "A longer description of the vulnerability.",
+      "severity": "HIGH",
+      "fingerprint": "sha256:...",
+      "packages": [
+        {
+          "name": "libssl3",
+          "fixed_version": "3.5.1-r0",
+          "installed_version": "3.5.0-r0"
+        }
+      ],
+      "images": ["example/app:latest"],
+      "containers": [
+        { "id": "8f2c...", "name": "app" }
+      ]
+    }
+  ],
+  "scan_errors": [
+    {
+      "image": "example/other:latest",
+      "error": "image scan failed: ...",
+      "containers": [
+        { "id": "41ab...", "name": "other" }
+      ]
+    }
+  ]
+}
+```
+
+- `time` is when the scan finished.
+- `vulnerabilities` are sorted by severity (`CRITICAL`, `HIGH`, `MEDIUM`,
+  `LOW`, then `UNKNOWN`) and then by title. A vulnerability found in several
+  images is listed once, with every image, container and affected package
+  it was found in. `id` is empty if the vulnerability has no identifier, and
+  `fixed_version` is empty if no fix is available.
+- `scan_errors` lists images that Purser couldn't scan, with the error.
+  The HTML report and the critical feed show these as "Unable to scan image"
+  vulnerabilities, but they aren't included in `vulnerabilities`.
+
 ## Docker pruning and missing images 
 
 If Purser runs against a docker daemon that prunes its images, the original

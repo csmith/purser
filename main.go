@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log/slog"
 	"maps"
 	"os"
@@ -60,7 +59,7 @@ func performScan(ctx context.Context, scanner *Scanner) {
 		os.Exit(1)
 	}
 
-	slog.Info("Scan complete", "vulnerabilities", len(res))
+	slog.Info("Scan complete", "vulnerabilities", len(res.Vulnerabilities), "errors", len(res.ScanErrors))
 
 	err = renderTemplates(*outputDir, res)
 	if err != nil {
@@ -69,13 +68,14 @@ func performScan(ctx context.Context, scanner *Scanner) {
 	}
 }
 
-func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerability, error) {
+func scanContainers(ctx context.Context, scanner *Scanner) (*ScanResult, error) {
 	containers, err := listContainers(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	vulns := make(map[string]SourcedVulnerability)
+	var scanErrors []ScanError
 	done := 0
 
 	for image := range containers {
@@ -83,14 +83,11 @@ func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerabili
 		res, err := scanner.Scan(ctx, image)
 		if err != nil {
 			slog.Error("Failed to scan image", "image", image, "error", err)
-			vulns["purser-scan-error-"+image] = SourcedVulnerability{
-				Title:       "Unable to scan image",
-				Description: fmt.Sprintf("Purser was unable to scan the image: %v", err),
-				Fingerprint: "purser-scan-error-" + image,
-				Severity:    "CRITICAL",
-				Images:      []string{image},
-				Containers:  containers[image],
-			}
+			scanErrors = append(scanErrors, ScanError{
+				Image:      image,
+				Error:      err.Error(),
+				Containers: containers[image],
+			})
 			continue
 		}
 
@@ -117,7 +114,11 @@ func scanContainers(ctx context.Context, scanner *Scanner) ([]SourcedVulnerabili
 		done++
 	}
 
-	return slices.Collect(maps.Values(vulns)), nil
+	return &ScanResult{
+		Time:            time.Now(),
+		Vulnerabilities: slices.Collect(maps.Values(vulns)),
+		ScanErrors:      scanErrors,
+	}, nil
 }
 
 func listContainers(ctx context.Context) (map[string][]Container, error) {
