@@ -151,7 +151,13 @@ func listSwarmContainers(ctx context.Context, c *client.Client) (map[string][]Co
 	images := make(map[string][]Container)
 	for i := range tasks.Items {
 		task := tasks.Items[i]
-		slog.Debug("Found swarm task", "id", task.ID, "name", task.Name, "status", task.Status, "runtime", task.Spec.Runtime)
+		slog.Debug(
+			"Found swarm task",
+			"id", task.ID,
+			"name", task.Name,
+			"status", task.Status,
+			"runtime", task.Spec.Runtime,
+		)
 		if task.Spec.ContainerSpec != nil {
 			image := task.Spec.ContainerSpec.Image
 			images[image] = append(

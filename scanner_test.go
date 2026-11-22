@@ -43,11 +43,14 @@ func TestDigestFor(t *testing.T) {
 		wantOK  bool
 	}{
 		{
-			name:    "matches same repository",
-			ref:     "git.yak-wall.ts.net/containers-mirror/adze:dev",
-			digests: []string{"other.example.com/foo@" + digest1, "git.yak-wall.ts.net/containers-mirror/adze@" + digest2},
-			want:    "git.yak-wall.ts.net/containers-mirror/adze@" + digest2,
-			wantOK:  true,
+			name: "matches same repository",
+			ref:  "git.yak-wall.ts.net/containers-mirror/adze:dev",
+			digests: []string{
+				"other.example.com/foo@" + digest1,
+				"git.yak-wall.ts.net/containers-mirror/adze@" + digest2,
+			},
+			want:   "git.yak-wall.ts.net/containers-mirror/adze@" + digest2,
+			wantOK: true,
 		},
 		{
 			name:    "no digest for this repository",
@@ -77,7 +80,15 @@ func TestDigestFor(t *testing.T) {
 				t.Parallel()
 				got, ok := digestFor(tt.ref, tt.digests)
 				if ok != tt.wantOK || got != tt.want {
-					t.Errorf("digestFor(%q, %v) = (%q, %v), want (%q, %v)", tt.ref, tt.digests, got, ok, tt.want, tt.wantOK)
+					t.Errorf(
+						"digestFor(%q, %v) = (%q, %v), want (%q, %v)",
+						tt.ref,
+						tt.digests,
+						got,
+						ok,
+						tt.want,
+						tt.wantOK,
+					)
 				}
 			},
 		)
