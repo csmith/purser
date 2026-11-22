@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fix feeds becoming invalid XML when a vulnerability contains characters XML doesn't allow
+
 ## 1.3.3 - 2026-11-15
 
 - Updated Go to 1.27.4, trivy to 0.76.0.

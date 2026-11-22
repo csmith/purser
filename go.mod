@@ -10,6 +10,7 @@ require (
 	github.com/google/go-containerregistry v0.22.1
 	github.com/moby/moby/client v0.6.2
 	github.com/samber/lo v1.53.0
+	github.com/stretchr/testify v1.12.1
 	modernc.org/sqlite v1.61.0
 )
 
@@ -306,7 +307,6 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.8.1 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
-	github.com/stretchr/testify v1.12.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tchap/go-patricia/v2 v2.3.3 // indirect
 	github.com/tetratelabs/wabin v0.0.0-20230304001439-f6f874872834 // indirect

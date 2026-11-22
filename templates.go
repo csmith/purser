@@ -12,6 +12,7 @@ import (
 	"strings"
 	"text/template"
 	"time"
+	"unicode"
 )
 
 //go:embed templates/*.gotpl
@@ -87,7 +88,7 @@ func renderHtml(targetDir string, severities []SeverityGroup) error {
 
 func renderFeeds(targetDir string, severities []SeverityGroup) error {
 	t, err := template.New("atom.xml.gotpl").
-		Funcs(template.FuncMap{"escape": html.EscapeString}).
+		Funcs(template.FuncMap{"escape": escapeXML}).
 		ParseFS(templates, "templates/atom.xml.gotpl")
 	if err != nil {
 		return err
@@ -101,6 +102,27 @@ func renderFeeds(targetDir string, severities []SeverityGroup) error {
 		}
 	}
 	return nil
+}
+
+// escapeXML escapes markup and replaces characters that XML 1.0 doesn't
+// allow (including invalid UTF-8) with U+FFFD.
+func escapeXML(s string) string {
+	return html.EscapeString(
+		strings.Map(
+			func(r rune) rune {
+				switch {
+				case r == '\t', r == '\n', r == '\r',
+					r >= 0x20 && r <= 0xD7FF,
+					r >= 0xE000 && r <= 0xFFFD,
+					r >= 0x10000 && r <= unicode.MaxRune:
+					return r
+				default:
+					return unicode.ReplacementChar
+				}
+			},
+			s,
+		),
+	)
 }
 
 func renderFeed(t *template.Template, targetDir string, sev SeverityGroup) error {
