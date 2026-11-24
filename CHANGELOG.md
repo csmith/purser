@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.0 - 2026-11-24
 
 - Write a JSON report (`report.json`) alongside the HTML report and feeds
 - Fix feeds becoming invalid XML when a vulnerability contains characters XML doesn't allow
