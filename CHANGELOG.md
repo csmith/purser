@@ -4,6 +4,7 @@
 
 - Write a JSON report (`report.json`) alongside the HTML report and feeds
 - Fix feeds becoming invalid XML when a vulnerability contains characters XML doesn't allow
+- Updated OpenTelemetry to 1.47.0
 
 ## 1.3.3 - 2026-11-15
 
