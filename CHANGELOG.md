@@ -4,7 +4,8 @@
 
 - Write a JSON report (`report.json`) alongside the HTML report and feeds
 - Fix feeds becoming invalid XML when a vulnerability contains characters XML doesn't allow
-- Updated OpenTelemetry to 1.47.0
+- Updated OpenTelemetry to 1.47.0, containerd to 2.4.2, and the golang.org/x
+  modules
 
 ## 1.3.3 - 2026-11-15
 
