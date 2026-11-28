@@ -11,7 +11,7 @@ require (
 	github.com/moby/moby/client v0.6.2
 	github.com/samber/lo v1.53.0
 	github.com/stretchr/testify v1.12.1
-	modernc.org/sqlite v1.61.0
+	modernc.org/sqlite v1.61.1
 )
 
 require (
